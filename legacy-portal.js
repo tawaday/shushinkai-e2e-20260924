@@ -144,7 +144,13 @@ function handleResolve(result) {
     renderInquiryAdmin_(result);
     return;
   }
-  message("ようこそ", `${result.memberName || "会員"} 様`);
+  message("再アクセス確認：応答の確認が必要です", JSON.stringify({
+    ok: result.ok, view: result.view || null,
+    environment: result.environment || null, role: result.role || null,
+    registered: result.registered == null ? null : result.registered,
+    alreadyRegistered: result.alreadyRegistered === true,
+    hasMemberId: !!result.memberId, hasMemberName: !!result.memberName
+  }, null, 2));
 }
 
 function showRegistration(fallbackUrl) {
