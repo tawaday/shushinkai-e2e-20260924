@@ -1,5 +1,5 @@
 const PORTAL = {
-  LIFF_ID: "2010887632-qvHbczSI",
+  LIFF_ID: "2010887632-DQiqnYEx",
   GAS_API_URL: "https://script.google.com/macros/s/AKfycbyD3otPl0SR8tuo0_u0Btpi8Ltxp7fCeIgkiFAY-Muj6jryAjwFdVN41DwRSTLstxQ/exec"
 };
 
