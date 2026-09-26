@@ -156,6 +156,11 @@ function handleResolve(result) {
     renderInquiryAdmin_(result);
     return;
   }
+  // These routes must resolve to an identity form, registered screen, or destination.
+  if (["card", "profile", "register"].includes(launchParams.view)) {
+    message("画面を開けませんでした", "表示に必要な情報を確認できませんでした。この画面を閉じ、LINE内から同じリンクをもう一度開いてください。繰り返す場合は、画面の画像と開いた時刻を事務局へお知らせください。");
+    return;
+  }
   message("ようこそ", `${result.memberName || "会員"} 様`);
 }
 
