@@ -31,6 +31,14 @@ const launchParams = (() => {
   };
 })();
 
+// Diagnostics are optional and must never interrupt the existing flow.
+function stageDiag_(method, ...args) {
+  try {
+    const diagnostics = typeof PortalStageDiagnostics !== "undefined" ? PortalStageDiagnostics : null;
+    return diagnostics && diagnostics[method] ? diagnostics[method](...args) : null;
+  } catch (_) { return null; }
+}
+
 document.addEventListener("DOMContentLoaded", start);
 
 async function start() {
@@ -48,7 +56,9 @@ async function start() {
         return;
       }
     }
+    stageDiag_("beforeInit", launchParams.view);
     await liff.init({ liffId:PORTAL.LIFF_ID, withLoginOnExternalBrowser:true });
+    stageDiag_("afterInit", launchParams.view);
     if (!liff.isLoggedIn()) {
       saveLaunchParamsForLogin_();
       liff.login({ redirectUri:location.href });
@@ -68,6 +78,7 @@ async function start() {
     sessionStorage.removeItem("shushinkai_liff_launch_params");
     handleResolve(result);
   } catch (error) {
+    stageDiag_("failure", "start");
     message("画面を開けません", error.message);
   }
 }
@@ -120,6 +131,7 @@ function handleResolve(result) {
     return;
   }
   if (result.redirectUrl) {
+    stageDiag_("screen", "redirect");
     location.replace(result.redirectUrl);
     return;
   }
@@ -148,6 +160,7 @@ function handleResolve(result) {
 }
 
 function showRegistration(fallbackUrl) {
+  stageDiag_("screen", "identity-form");
   const link = $("applicationLink");
   link.classList.toggle("hidden", !fallbackUrl);
   if (fallbackUrl) link.href = fallbackUrl;
@@ -155,6 +168,7 @@ function showRegistration(fallbackUrl) {
 }
 
 function renderRegistered(result) {
+  stageDiag_("screen", "registered");
   $("registeredMemberId").textContent = result.memberId || "（記録なし）";
   $("registeredMemberName").textContent = result.memberName || "（記録なし）";
   $("registeredAt").textContent = result.registeredAt || "（記録なし）";
@@ -188,6 +202,7 @@ async function completeRegistration_(result) {
 }
 
 function message(title, text, url, label) {
+  stageDiag_("screen", title === "ようこそ" ? "welcome" : "error");
   show("message");
   $("messageTitle").textContent = title;
   $("messageText").textContent = text || "";
@@ -372,16 +387,30 @@ async function api(data) {
     newsToken:String(data.newsToken || ""),
     _t:String(Date.now())
   });
-  const response = await fetch(PORTAL.GAS_API_URL + "?" + route.toString(), {
-    method:"POST",
-    body,
-    cache:"no-store",
-    redirect:"follow"
-  });
-  if (!response.ok) throw Error("通信エラー（HTTP " + response.status + "）");
-  const result = await response.json();
-  if (!result || typeof result.ok !== "boolean") throw Error("本人確認結果を読み取れませんでした。");
-  return result;
+  const diagnosticRequest = stageDiag_("beginRequest", data);
+  if (diagnosticRequest) {
+    route.set("diag", "1"); route.set("diagRid", diagnosticRequest);
+    body.set("diag", "1"); body.set("diagRid", diagnosticRequest);
+  }
+  try {
+    const response = await fetch(PORTAL.GAS_API_URL + "?" + route.toString(), {
+      method:"POST",
+      body,
+      cache:"no-store",
+      redirect:"follow"
+    });
+    if (!response.ok) {
+      stageDiag_("response", diagnosticRequest, response, null);
+      throw Error("通信エラー（HTTP " + response.status + "）");
+    }
+    const result = await response.json();
+    stageDiag_("response", diagnosticRequest, response, result);
+    if (!result || typeof result.ok !== "boolean") throw Error("本人確認結果を読み取れませんでした。");
+    return result;
+  } catch (error) {
+    stageDiag_("failure", "fetch-or-json", diagnosticRequest);
+    throw error;
+  }
 }
 
 function renderNews(items) {

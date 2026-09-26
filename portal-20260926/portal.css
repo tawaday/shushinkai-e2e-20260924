@@ -9,3 +9,9 @@
 .dateInputFrame{display:block;margin-top:7px;padding:13px;border:1px solid #cfc5bd;border-radius:10px;background:#fff}
 .dateInputFrame input[type="date"]{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:1.25em;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;-webkit-appearance:none;appearance:none}
 .dateInputFrame input[type="date"]::-webkit-date-and-time-value{min-height:1.25em;text-align:left}
+
+.stageDiagnostics{max-width:564px;margin:0 auto 24px;padding:16px;border:2px solid #9b7424;border-radius:12px;background:#fff8e8;color:#292321}
+.stageDiagnostics h2{margin:0 0 8px;font-size:18px}.stageDiagnostics p{font-size:14px;margin:8px 0}
+.stageDiagnostics pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.5;margin:12px 0}
+.stageDiagnostics button{padding:10px 14px;border:1px solid #9b7424;border-radius:8px;background:#fff;font:inherit;font-size:14px;color:inherit}
+.stageDiagnostics details{margin-top:12px}.stageDiagnostics summary{cursor:pointer;font-size:14px}@media(max-width:600px){.stageDiagnostics{margin-left:18px;margin-right:18px}}
